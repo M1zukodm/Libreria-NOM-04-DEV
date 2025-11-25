@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOM-04 Dev Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- ESTILOS DEL PLUGIN (Necesarios para que la lista flote correctamente) -->
+    <style>
+        /* Contenedor relativo para que la lista absoluta se posicione respecto a él */
+        .nomcat-wrapper {
+            position: relative;
+        }
+
+        /* Lista de resultados flotante */
+        .nomcat-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            max-height: 250px;
+            overflow-y: auto;
+            display: none;
+            /* Oculto por defecto */
+        }
+
+        .nomcat-results.active {
+            display: block;
+        }
+
+        .nomcat-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+
+        .nomcat-item:hover {
+            background-color: #f0f7ff;
+        }
+
+        .nomcat-item strong {
+            color: #0d6efd;
+        }
+
+        /* Badge para mostrar origen (ej: CLUES vs HORARIOS) */
+        .nomcat-badge {
+            float: right;
+            font-size: 0.7em;
+            background: #eee;
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: #666;
+        }
+
+        /* Estilos específicos de este portal de documentación */
+        .nav-tabs .nav-link {
+            color: #495057;
+            cursor: pointer;
+        }
+
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            border-bottom: 2px solid #0d6efd;
+            color: #0d6efd;
+        }
+
+        pre {
+            background: #212529;
+            color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            max-height: 300px;
+            overflow: auto;
+        }
+
+        .code-container {
+            display: none;
+        }
+
+        .code-container.active {
+            display: block;
+        }
+
+        /* Estilo para inputs con iconos */
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            z-index: 5;
+        }
+
+        .input-with-icon input {
+            padding-left: 40px;
+        }
+
+        /* Bordes estilizados para formularios */
+        .form-container {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <div class="container py-5">
+
+        <!-- ENCABEZADO -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="fw-bold text-primary"><i class="fas fa-cubes"></i> NOM-04 SDK</h1>
+                <p class="lead text-muted">Librería de integración para los 9 Catálogos Normativos de Salud.</p>
+
+                <div class="d-flex justify-content-center gap-3 mt-3">
+                    <a href="nomcat-client.js" download class="btn btn-outline-dark btn-sm">
+                        <i class="fas fa-download"></i> Descargar Motor (.js)
+                    </a>
+                    <a href="README.md" download class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-book"></i> Ver Manual (.md)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DE EJEMPLOS -->
+        <h4 class="mb-4 pb-2 border-bottom">Catálogos Disponibles (Live Demo)</h4>
+
+        <div class="row g-4">
+
+            <!-- 1. CÓDIGOS POSTALES -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom-0">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong class="text-primary"><i class="fas fa-mail-bulk"></i> Códigos Postales</strong>
+                        </div>
+                        <ul class="nav nav-tabs card-header-tabs">
+                            <li class="nav-item"><a class="nav-link active"
+                                    onclick="switchTab(event, 'cp-demo', 'cp-code')">Demo</a></li>
+                            <li class="nav-item"><a class="nav-link"
+                                    onclick="switchTab(event, 'cp-code', 'cp-demo')">&lt;/&gt; Código</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <!-- DEMO VISUAL -->
+                        <div id="cp-demo" class="code-container active">
+                            <div class="form-container">
+                                <form data-catalog="codigos_postales" autocomplete="off">
+                                    <div class="mb-2">
+                                        <label class="form-label small">Buscador</label>
+                                        <div class="nomcat-wrapper input-with-icon">
+                                            <i class="fas fa-search"></i>
+                                            <input type="text" class="form-control nomcat-search"
+                                                placeholder="Ej: 06700 ó Roma">
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <input type="text" class="form-control form-control-sm" data-field="d_asenta"
+                                            placeholder="Colonia" readonly>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-6"><input type="text" class="form-control form-control-sm"
+                                                data-field="D_mnpio" placeholder="Municipio" readonly></div>
+                                        <div class="col-6"><input type="text" class="form-control form-control-sm"
+                                                data-field="d_estado" placeholder="Estado" readonly></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- CÓDIGO PARA COPIAR -->
+                        <div id="cp-code" class="code-container">
+                            <pre><code>&lt;form data-catalog="codigos_postales"&gt;
+  &lt;div class="nomcat-wrapper input-with-icon"&gt;
+    &lt;i class="fas fa-search"&gt;&lt;/i&gt;
+    &lt;input class="nomcat-search" placeholder="Buscar..."&gt;
+  &lt;/div&gt;
+  
+  &lt;input data-field="d_asenta"&gt;
+  &lt;input data-field="D_mnpio"&gt;
+  &lt;input data-field="d_estado"&gt;
+&lt;/form&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. CLUES -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom-0">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong class="text-danger"><i class="fas fa-hospital"></i> CLUES</strong>
+                        </div>
+                        <ul class="nav nav-tabs card-header-tabs">
+                            <li class="nav-item"><a class="nav-link active"
+                                    onclick="switchTab(event, 'clues-demo', 'clues-code')">Demo</a></li>
+                            <li class="nav-item"><a class="nav-link"
+                                    onclick="switchTab(event, 'clues-code', 'clues-demo')">&lt;/&gt; Código</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div id="clues-demo" class="code-container active">
+                            <div class="form-container">
+                                <form data-catalog="clues" autocomplete="off">
+                                    <div class="mb-2">
+                                        <label class="form-label small">Unidad Médica</label>
+                                        <div class="nomcat-wrapper input-with-icon">
+                                            <i class="fas fa-hospital"></i>
+                                            <input type="text" class="form-control nomcat-search"
+                                                placeholder="Clave o Nombre...">
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <input type="text" class="form-control form-control-sm"
+                                            data-field="NOMBRE DE LA UNIDAD" placeholder="Nombre Unidad" readonly>
+                                    </div>
+                                    <div class="mb-2">
+                                        <input type="text" class="form-control form-control-sm" data-field="ENTIDAD"
+                                            placeholder="Entidad" readonly>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="clues-code" class="code-container">
+                            <pre><code>&lt;form data-catalog="clues"&gt;
+  &lt;div class="nomcat-wrapper input-with-icon"&gt;
+    &lt;i class="fas fa-hospital"&gt;&lt;/i&gt;
+    &lt;input class="nomcat-search"&gt;
+  &lt;/div&gt;
+  
+  &lt;input data-field="CLUES"&gt;
+  &lt;input data-field="NOMBRE DE LA UNIDAD"&gt;
+  &lt;input data-field="ENTIDAD"&gt;
+&lt;/form&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. ENTIDADES -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom-0">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong class="text-success"><i class="fas fa-map"></i> Entidades</strong>
+                        </div>
+                        <ul class="nav nav-tabs card-header-tabs">
+                            <li class="nav-item"><a class="nav-link active"
+                                    onclick="switchTab(event, 'ent-demo', 'ent-code')">Demo</a></li>
+                            <li class="nav-item"><a class="nav-link"
+                                    onclick="switchTab(event, 'ent-code', 'ent-demo')">&lt;/&gt; Código</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div id="ent-demo" class="code-container active">
+                            <div class="form-container">
+                                <form data-catalog="entidades" autocomplete="off">
+                                    <div class="mb-2">
+                                        <label class="form-label small">Entidad</label>
+                                        <div class="nomcat-wrapper input-with-icon">
+                                            <i class="fas fa-map"></i>
+                                            <input type="text" class="form-control nomcat-search"
+                                                placeholder="Nombre...">
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">ID</span>
+                                        <input type="text" class="form-control" data-field="CATALOG_KEY" readonly>
+                                        <span class="input-group-text">ABR</span>
+                                        <input type="text" class="form-control" data-field="ABREVIATURA" readonly>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="ent-code" class="code-container">
+                            <pre><code>&lt;form data-catalog="entidades"&gt;
+  &lt;div class="nomcat-wrapper input-with-icon"&gt;
+    &lt;i class="fas fa-map"&gt;&lt;/i&gt;
+    &lt;input class="nomcat-search"&gt;
+  &lt;/div&gt;
+  &lt;input data-field="CATALOG_KEY"&gt;
+  &lt;input data-field="ABREVIATURA"&gt;
+&lt;/form&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. MUNICIPIOS -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom-0">
+                        <strong class="text-info"><i class="fas fa-city"></i> Municipios</strong>
+                        <ul class="nav nav-tabs card-header-tabs float-end">
+                            <li class="nav-item"><a class="nav-link active"
+                                    onclick="switchTab(event, 'mun-demo', 'mun-code')">Demo</a></li>
+                            <li class="nav-item"><a class="nav-link"
+                                    onclick="switchTab(event, 'mun-code', 'mun-demo')">&lt;/&gt;</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div id="mun-demo" class="code-container active">
+                            <div class="form-container">
+                                <form data-catalog="municipios" autocomplete="off">
+                                    <div class="mb-2">
+                                        <div class="nomcat-wrapper input-with-icon">
+                                            <i class="fas fa-city"></i>
+                                            <input type="text" class="form-control nomcat-search"
+                                                placeholder="Buscar Municipio...">
+                                        </div>
+                                    </div>
+                                    <div class="mb-2"><input type="text" class="form-control form-control-sm"
+                                            data-field="CVEGEO" placeholder="Clave" readonly></div>
+                                    <div class="mb-2"><input type="text" class="form-control form-control-sm"
+                                            data-field="NOM_ENT" placeholder="Estado" readonly></div>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="mun-code" class="code-container">
+                            <pre><code>&lt;form data-catalog="municipios"&gt;
+  &lt;div class="nomcat-wrapper input-with-icon"&gt;
+    &lt;i class="fas fa-city"&gt;&lt;/i&gt;
+    &lt;input class="nomcat-search"&gt;
+  &lt;/div&gt;
+  &lt;input data-field="CVEGEO"&gt;
+  &lt;input data-field="NOM_ENT"&gt;
+&lt;/form&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. LOCALIDADES -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom-0">
+                        <strong class="text-info"><i class="fas fa-tree"></i> Localidades</strong>
+                        <ul class="nav nav-tabs card-header-tabs float-end">
+                            <li class="nav-item"><a class="nav-link active"
+                                    onclick="switchTab(event, 'loc-demo', 'loc-code')">Demo</a></li>
+                            <li class="nav-item"><a class="nav-link"
+                                    onclick="switchTab(event, 'loc-code', 'loc-demo')">&lt;/&gt;</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div id="loc-demo" class="code-container active">
+                            <div class="form-container">
+                                <form data-catalog="localidades" autocomplete="off">
+                                    <div class="mb-2">
+                                        <div class="nomcat-wrapper input-with-icon">
+                                            <i class="fas fa-tree"></i>
+                                            <input type="text" class="form-control nomcat-search"
+                                                placeholder="Buscar Localidad...">
+                                        </div>
+                                    </div>
+                                    <div class="mb-2"><input type="text" class="form-control form-control-sm"
+                                            data-field="CVEGEO" placeholder="Clave" readonly></div>
+                                    <div class="mb-2"><input type="text" class="form-control form-control-sm"
+                                            data-field="NOM_MUN" placeholder="Municipio" readonly></div>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="loc-code" class="code-container">
+                            <pre><code>&lt;form data-catalog="localidades"&gt;
+  &lt;div class="nomcat-wrapper input-with-icon"&gt;
+    &lt;i class="fas fa-tree"&gt;&lt;/i&gt;
+    &lt;input class="nomcat-search"&gt;
+  &lt;/div&gt;
+  &lt;input data-field="CVEGEO"&gt;
+  &lt;input data-field="NOM_MUN"&gt;
+&lt;/form&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. NACIONALIDADES -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom-0">
+                        <strong class="text-secondary"><i class="fas fa-flag"></i> Nacionalidades</strong>
+                        <ul class="nav nav-tabs card-header-tabs float-end">
+                            <li class="nav-item"><a class="nav-link active"
+                                    onclick="switchTab(event, 'nac-demo', 'nac-code')">Demo</a></li>
+                            <li class="nav-item"><a class="nav-link"
+                                    onclick="switchTab(event, 'nac-code', 'nac-demo')">&lt;/&gt;</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div id="nac-demo" class="code-container active">
+                            <div class="form-container">
+                                <form data-catalog="nacionalidades" autocomplete="off">
+                                    <div class="mb-2">
+                                        <div class="nomcat-wrapper input-with-icon">
+                                            <i class="fas fa-flag"></i>
+                                            <input type="text" class="form-control nomcat-search"
+                                                placeholder="Ej: Mexicana">
+                                        </div>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-3"><input type="text" class="form-control form-control-sm"
+                                                data-field="codigo pais" placeholder="Código" readonly></div>
+                                        <div class="col-9"><input type="text" class="form-control form-control-sm"
+                                                data-field="pais" placeholder="País" readonly></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="nac-code" class="code-container">
+                            <pre><code>&lt;form data-catalog="nacionalidades"&gt;
+  &lt;div class="nomcat-wrapper input-with-icon"&gt;
+    &lt;i class="fas fa-flag"&gt;&lt;/i&gt;
+    &lt;input class="nomcat-search"&gt;
+  &lt;/div&gt;
+  &lt;input data-field="pais"&gt;
+  &lt;input data-field="codigo pais"&gt;
+&lt;/form&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. FORMACIÓN -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom-0">
+                        <strong class="text-dark"><i class="fas fa-graduation-cap"></i> Formación</strong>
+                        <ul class="nav nav-tabs card-header-tabs float-end">
+                            <li class="nav-item"><a class="nav-link active"
+                                    onclick="switchTab(event, 'form-demo', 'form-code')">Demo</a></li>
+                            <li class="nav-item"><a class="nav-link"
+                                    onclick="switchTab(event, 'form-code', 'form-demo')">&lt;/&gt;</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div id="form-demo" class="code-container active">
+                            <div class="form-container">
+                                <form data-catalog="formacion" autocomplete="off">
+                                    <div class="mb-2">
+                                        <div class="nomcat-wrapper input-with-icon">
+                                            <i class="fas fa-graduation-cap"></i>
+                                            <input type="text" class="form-control nomcat-search"
+                                                placeholder="Licenciatura...">
+                                        </div>
+                                    </div>
+                                    <div class="mb-2"><input type="text" class="form-control form-control-sm"
+                                            data-field="AGRUPACION" placeholder="Agrupación" readonly></div>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="form-code" class="code-container">
+                            <pre><code>&lt;form data-catalog="formacion"&gt;
+  &lt;div class="nomcat-wrapper input-with-icon"&gt;
+    &lt;i class="fas fa-graduation-cap"&gt;&lt;/i&gt;
+    &lt;input class="nomcat-search"&gt;
+  &lt;/div&gt;
+  &lt;input data-field="AGRUPACION"&gt;
+&lt;/form&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. RELIGIONES -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom-0">
+                        <strong class="text-warning text-dark"><i class="fas fa-praying-hands"></i> Religiones</strong>
+                        <ul class="nav nav-tabs card-header-tabs float-end">
+                            <li class="nav-item"><a class="nav-link active"
+                                    onclick="switchTab(event, 'rel-demo', 'rel-code')">Demo</a></li>
+                            <li class="nav-item"><a class="nav-link"
+                                    onclick="switchTab(event, 'rel-code', 'rel-demo')">&lt;/&gt;</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div id="rel-demo" class="code-container active">
+                            <div class="form-container">
+                                <form data-catalog="religiones" autocomplete="off">
+                                    <div class="mb-2">
+                                        <div class="nomcat-wrapper input-with-icon">
+                                            <i class="fas fa-praying-hands"></i>
+                                            <input type="text" class="form-control nomcat-search"
+                                                placeholder="Católica...">
+                                        </div>
+                                    </div>
+                                    <div class="mb-2"><input type="text" class="form-control form-control-sm"
+                                            data-field="GRUPO" placeholder="Grupo" readonly></div>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="rel-code" class="code-container">
+                            <pre><code>&lt;form data-catalog="religiones"&gt;
+  &lt;div class="nomcat-wrapper input-with-icon"&gt;
+    &lt;i class="fas fa-praying-hands"&gt;&lt;/i&gt;
+    &lt;input class="nomcat-search"&gt;
+  &lt;/div&gt;
+  &lt;input data-field="GRUPO"&gt;
+&lt;/form&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. LENGUAS -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom-0">
+                        <strong class="text-warning text-dark"><i class="fas fa-language"></i> Lenguas</strong>
+                        <ul class="nav nav-tabs card-header-tabs float-end">
+                            <li class="nav-item"><a class="nav-link active"
+                                    onclick="switchTab(event, 'len-demo', 'len-code')">Demo</a></li>
+                            <li class="nav-item"><a class="nav-link"
+                                    onclick="switchTab(event, 'len-code', 'len-demo')">&lt;/&gt;</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div id="len-demo" class="code-container active">
+                            <div class="form-container">
+                                <form data-catalog="lenguas_indigenas" autocomplete="off">
+                                    <div class="mb-2">
+                                        <div class="nomcat-wrapper input-with-icon">
+                                            <i class="fas fa-language"></i>
+                                            <input type="text" class="form-control nomcat-search"
+                                                placeholder="Náhuatl...">
+                                        </div>
+                                    </div>
+                                    <div class="mb-2"><input type="text" class="form-control form-control-sm"
+                                            data-field="FAMILIA" placeholder="Familia" readonly></div>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="len-code" class="code-container">
+                            <pre><code>&lt;form data-catalog="lenguas_indigenas"&gt;
+  &lt;div class="nomcat-wrapper input-with-icon"&gt;
+    &lt;i class="fas fa-language"&gt;&lt;/i&gt;
+    &lt;input class="nomcat-search"&gt;
+  &lt;/div&gt;
+  &lt;input data-field="FAMILIA"&gt;
+&lt;/form&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCRIPT PARA INTERCAMBIAR PESTAÑAS -->
+    <script>
+        function switchTab(event, showId, hideId) {
+            event.preventDefault();
+            const card = event.target.closest('.card');
+            // Resetear clases active
+            card.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Mostrar contenido
+            card.querySelector(`#${hideId}`).classList.remove('active');
+            card.querySelector(`#${showId}`).classList.add('active');
+        }
+    </script>
+
+    <!-- ========================================================== -->
+    <!-- LA INTEGRACIÓN REAL -->
+    <!-- ========================================================== -->
+    <script src="nomcat-client.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // CONFIGURA AQUÍ TU URL (Local o Producción)
+            const API_URL = "http://localhost:7071/api/ConsultarCatalogos";
+
+            new NomCatClient(API_URL);
+        });
+    </script>
+
+</body>
+
+</html>
