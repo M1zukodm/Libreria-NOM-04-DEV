@@ -1,131 +1,128 @@
-🏥 NOM-04 Client Library
+# 🏥 NOM-04 Cliente SDK
 
-Librería ligera de JavaScript para integrar el autocompletado de los 9 Catálogos Normativos de Salud (NOM-04) en cualquier formulario web.
+¡Bienvenido! Este proyecto ofrece una solución completa para integrar el **autocompletado de los 9 Catálogos Normativos de Salud (NOM-04)** en cualquier formulario web de manera sencilla y profesional.
 
-📦 Instalación
+---
 
-Descarga el archivo nomcat-client.js.
+## 📌 Descripción General
 
-Guárdalo en la carpeta public o js de tu proyecto.
+El sistema consta de dos partes principales:
 
-Importalo en tu HTML antes de cerrar el </body>.
+### 🔧 Backend
+Una **Azure Function** que procesa búsquedas masivas optimizadas.
 
-<script src="path/to/nomcat-client.js"></script>
+### 💻 Frontend
+Una librería JS (**nomcat-client.js**) para integración *plug-and-play*.
 
+---
 
-🚀 Inicialización
+## 📦 Contenido del Repositorio
 
-En tu archivo principal de JavaScript o en un bloque <script>, inicializa el cliente apuntando a tu Azure Function:
+| Archivo | Descripción |
+|---------|-------------|
+| **nomcat-client.js** | El motor. Contiene toda la lógica de autocompletado y conexión. |
+| **index.html** | Portal de demostración con guía interactiva y generador de código. |
+| **README.md** | Este manual de uso e integración. |
 
+---
+
+## 🚀 Guía Rápida de Integración
+
+### 1. Importar el script
+Descarga `nomcat-client.js` y agrégalo antes de `</body>`.
+
+```html
+<script src="js/nomcat-client.js"></script>
+```
+
+---
+
+### 2. Inicializar
+
+```js
 document.addEventListener('DOMContentLoaded', () => {
-    // Reemplaza con la URL real de producción
-    const API_URL = "[https://tu-app.azurewebsites.net/api/ConsultarCatalogos](https://tu-app.azurewebsites.net/api/ConsultarCatalogos)";
-    
+    const API_URL = "https://tu-app.azurewebsites.net/api/ConsultarCatalogos";
     new NomCatClient(API_URL);
 });
+```
 
+---
 
-🛠 Uso (HTML Declarativo)
+### 3. Crear Formularios (HTML Declarativo)
+No necesitas escribir JS adicional. Usa `data-catalog` y `data-field`.
 
-No necesitas escribir JavaScript para cada formulario. La librería usa Atributos de Datos para funcionar automáticamente.
+#### Ejemplo: Buscador de Código Postal
 
-Estructura Básica
-
-Contenedor: Agrega data-catalog="NOMBRE_CATALOGO" al <form> o <div> padre.
-
-Buscador: Agrega la clase nomcat-search al input donde el usuario escribirá.
-
-Receptores: Agrega data-field="CAMPO_JSON" a los inputs que se deben llenar automáticamente.
-
-Ejemplo: Buscador de Códigos Postales
-
+```html
 <form data-catalog="codigos_postales">
-    
-    <!-- Input que activa la búsqueda -->
-    <input type="text" class="form-control nomcat-search" placeholder="Escribe CP o Colonia...">
-    
-    <!-- Inputs que reciben la información -->
+    <div class="nomcat-wrapper">
+        <input type="text" class="form-control nomcat-search" placeholder="Buscar CP...">
+    </div>
+
     <input type="text" data-field="d_asenta" placeholder="Colonia" readonly>
     <input type="text" data-field="D_mnpio" placeholder="Municipio" readonly>
     <input type="text" data-field="d_estado" placeholder="Estado" readonly>
-
 </form>
+```
 
+---
 
-📚 Catálogos Disponibles (data-catalog)
+## 📚 Referencia de Catálogos y Campos
+Usa estos valores en `data-catalog` y `data-field`.
 
-Catálogo
+### 🗂 Tabla de Catálogos Disponibles
 
-Clave para data-catalog
+| **Catálogo (data-catalog)** | **Campos Disponibles (data-field)** |
+|-----------------------------|--------------------------------------|
+| `codigos_postales` | d_codigo, d_asenta, D_mnpio, d_estado |
+| `clues` | CLUES, NOMBRE DE LA UNIDAD, ENTIDAD, JURISDICCION |
+| `entidades` | CATALOG_KEY, ENTIDAD_FEDERATIVA, ABREVIATURA |
+| `municipios` | CVEGEO, MUNICIPIO, NOM_ENT |
+| `localidades` | CVEGEO, LOCALIDAD, NOM_MUN |
+| `nacionalidades` | clave nacionalidad, pais, codigo pais |
+| `formacion` | CATALOG_KEY, FORMACION_ACADEMICA, AGRUPACION |
+| `religiones` | CLAVE CREDO, CREDO, GRUPO |
+| `lenguas_indigenas` | CLAVE_LENGUA, LENGUA INDÍGENA, FAMILIA |
 
-Campos Principales (data-field)
+---
 
-Códigos Postales
+## 🎨 Estilos CSS Requeridos
+Agrega estos estilos para que la lista desplegable funcione correctamente.
 
-codigos_postales
-
-d_codigo, d_asenta, D_mnpio, d_estado
-
-Unidades Salud
-
-clues
-
-CLUES, NOMBRE DE LA UNIDAD, ENTIDAD, JURISDICCION
-
-Municipios
-
-municipios
-
-CVEGEO, MUNICIPIO, NOM_ENT
-
-Localidades
-
-localidades
-
-CVEGEO, LOCALIDAD, NOM_MUN
-
-Entidades
-
-entidades
-
-CATALOG_KEY, ENTIDAD_FEDERATIVA, ABREVIATURA
-
-Nacionalidades
-
-nacionalidades
-
-clave nacionalidad, pais, codigo pais
-
-Formación
-
-formacion
-
-CATALOG_KEY, FORMACION_ACADEMICA, AGRUPACION
-
-Religiones
-
-religiones
-
-CLAVE CREDO, CREDO, GRUPO
-
-Lenguas
-
-lenguas_indigenas
-
-CLAVE_LENGUA, LENGUA INDÍGENA, FAMILIA
-
-🎨 Estilos CSS Requeridos
-
-Para que el menú desplegable funcione correctamente, agrega esto a tu CSS:
-
+```css
+/* Contenedor relativo */
 .nomcat-wrapper { position: relative; }
 
+/* Lista flotante */
 .nomcat-results {
-    position: absolute; 
-    top: 100%; left: 0; right: 0; z-index: 1000;
-    background: white; border: 1px solid #ccc;
-    max-height: 200px; overflow-y: auto;
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    max-height: 200px;
+    overflow-y: auto;
     display: none;
 }
 
+/* Mostrar lista activa */
 .nomcat-results.active { display: block; }
+
+/* Estilo de items */
+.nomcat-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+.nomcat-item:hover { background-color: #f8f9fa; }
+```
+
+---
+
+## ❤️ Hecho con dedicación
+Creado para **agilizar la captura de datos normativos** en sistemas de salud y cumplir NOM-04 de forma profesional.
+
+---
+
