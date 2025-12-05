@@ -579,14 +579,12 @@
         }
     </script>
 
-    <!-- ========================================================== -->
-    <!-- LA INTEGRACIÓN REAL -->
-    <!-- ========================================================== -->
+   
     <script src="nomcat-client.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // CONFIGURA AQUÍ TU URL (Local o Producción)
-            const API_URL = "http://localhost:7071/api/ConsultarCatalogos";
+            // URL (Local o Producción)
+            const API_URL = "https://fa-estaditicos-bgahh2ftevgga9cx.mexicocentral-01.azurewebsites.net/api/ConsultarCatalogos";
 
             new NomCatClient(API_URL);
         });
